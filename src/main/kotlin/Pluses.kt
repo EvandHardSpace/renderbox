@@ -1,82 +1,71 @@
-import org.openrndr.Program
 import org.openrndr.animatable.Animatable
 import org.openrndr.animatable.easing.Easing
 import org.openrndr.application
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
 import org.openrndr.draw.isolated
+import org.openrndr.extra.color.presets.LIGHT_CORAL
 import org.openrndr.math.Vector2
 import org.openrndr.shape.ShapeContour
 import org.openrndr.shape.contour
 
-/**
- *  This is a template for a live program.
- *
- *  It uses oliveProgram {} instead of program {}. All code inside the
- *  oliveProgram {} can be changed while the program is running.
- */
-const val unit = 29.0
-const val iteration = 12
+const val unit = 30.0
+const val matrixSize = 12
+const val duration = 800L
 
 var switch = false
 
+class Anim : Animatable() {
+    var rotationDegree: Double = 0.0
+}
+
 fun main() = application {
-    configure {
-        width = 800
-        height = 800
-    }
-    val animation = object : Animatable() {
-        var rotationDegree: Double = 0.0
-    }
+    configure { width = 800; height = 800 }
+
+    val animatrix: List<Triple<Int, Int, Anim>> = buildList {
+        (0 until matrixSize).forEach { y ->
+            buildList {
+                (0 until matrixSize).forEach { x ->
+                    Triple(x, y, Anim()).run(::add)
+                }
+            }.run(::add)
+        }
+    }.flatten()
+
     program {
         extend {
-            animation.updateAnimation()
-            if (!animation.hasAnimations()) {
-                switch = switch.not()
-                animation.apply {
-                    if(switch) {
-                        ::rotationDegree.animate(90.0, 3000, Easing.CubicInOut)
-                        ::rotationDegree.complete()
-                    } else {
-                        ::rotationDegree.animate(0.0, 3000, Easing.CubicInOut)
-                        ::rotationDegree.complete()
+            if (switch) {
+                drawer.clear(ColorRGBa.WHITE)
+                drawer.fill = ColorRGBa.LIGHT_CORAL
+
+                drawer.translate(Vector2(unit * 2, unit))
+            } else drawer.clear(ColorRGBa.LIGHT_CORAL)
+
+            (0 until matrixSize).forEach { j ->
+                (0 until matrixSize).forEach { i ->
+                    val startPoint = Vector2(
+                        x = i * 3 * unit + j * unit - matrixSize * unit,
+                        y = -i * unit + j * 3 * unit
+                    )
+
+                    animatrix.find { it.first == j && it.second == i }?.third?.let { anim ->
+                        anim.updateAnimation()
+                        if (anim.hasAnimations().not()) {
+                            if (i == matrixSize - 1 && j == matrixSize - 1) switch = switch.not()
+                            anim.apply {
+                                if (switch.not()) {
+                                    ::rotationDegree.animate(90.0, duration, Easing.CubicInOut)
+                                    ::rotationDegree.complete()
+                                } else {
+                                    ::rotationDegree.animate(0.0, duration, Easing.CubicInOut)
+                                    ::rotationDegree.complete()
+                                }
+                            }
+                        }
+                        drawer.rotatedContour(startPoint = startPoint, degree = anim.rotationDegree, unit = unit)
                     }
                 }
             }
-            if (switch) whiteIteration(animation.rotationDegree.coerceIn(0.0, 90.0))
-            else pinkIteration(animation.rotationDegree)
-        }
-    }
-}
-
-fun Program.whiteIteration(rotationDegree: Double) {
-    drawer.clear(ColorRGBa.PINK)
-
-    (0 until iteration).forEach { j ->
-        (0 until iteration).forEach { i ->
-            val startPoint = Vector2(
-                x = i * 3 * unit + j * unit - iteration * unit,
-                y = -i * unit + j * 3 * unit
-            )
-            drawer.rotatedContour(startPoint = startPoint, degree = rotationDegree, unit = unit)
-        }
-    }
-}
-
-fun Program.pinkIteration(rotationDegree: Double) {
-    drawer.clear(ColorRGBa.WHITE)
-    drawer.fill = ColorRGBa.PINK
-
-    drawer.translate(Vector2(unit * 2, unit))
-
-    (0 until iteration).forEach { j ->
-        (0 until iteration).forEach { i ->
-            val startPoint = Vector2(
-                x = i * 3 * unit + j * unit - iteration * unit,
-                y = -i * unit + j * 3 * unit
-            )
-
-            drawer.rotatedContour(startPoint = startPoint, degree = rotationDegree, unit = unit)
         }
     }
 }
@@ -109,11 +98,9 @@ fun plus(corner: Vector2, unit: Double): ShapeContour = contour {
     close()
 }
 
-fun Drawer.rotatedContour(startPoint: Vector2, degree: Double, unit: Double) {
-    isolated {
-        translate(startPoint + 1.5 * unit)
-        rotate(degree)
-        translate(Vector2.ZERO - 1.5 * unit)
-        contour(plus(Vector2.ZERO, unit))
-    }
+fun Drawer.rotatedContour(startPoint: Vector2, degree: Double, unit: Double) = isolated {
+    translate(startPoint + 1.5 * unit)
+    rotate(degree)
+    translate(Vector2.ZERO - 1.5 * unit)
+    contour(plus(Vector2.ZERO, unit))
 }

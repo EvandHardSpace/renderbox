@@ -1,15 +1,13 @@
 import org.openrndr.application
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.LineCap
-import org.openrndr.extra.olive.oliveProgram
-import org.openrndr.ffmpeg.ScreenRecorder
 import org.openrndr.math.Vector2
 import org.openrndr.shape.Circle
 import org.openrndr.shape.LineSegment
 import kotlin.math.cos
 
 fun main() = application {
-    oliveProgram {
+    program {
         extend {
             drawer.clear(ColorRGBa.PINK)
             drawer.strokeWeight = 1.0
