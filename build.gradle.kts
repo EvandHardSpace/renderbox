@@ -90,7 +90,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.shadow)
     alias(libs.plugins.runtime)
-    alias(libs.plugins.gitarchive.tomarkdown).apply(false)
+    alias(libs.plugins.gitarchive.tomarkdown) apply false
 }
 
 repositories {
@@ -109,12 +109,8 @@ dependencies {
     implementation(libs.kotlin.logging)
 
     when (applicationLogging) {
-        Logging.NONE -> {
-            runtimeOnly(libs.slf4j.nop)
-        }
-        Logging.SIMPLE -> {
-            runtimeOnly(libs.slf4j.simple)
-        }
+        Logging.NONE -> runtimeOnly(libs.slf4j.nop)
+        Logging.SIMPLE -> runtimeOnly(libs.slf4j.simple)
         Logging.FULL -> {
             runtimeOnly(libs.log4j.slf4j2)
             runtimeOnly(libs.log4j.core)
