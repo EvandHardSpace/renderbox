@@ -7,8 +7,8 @@ import org.openrndr.shape.LineSegment
 import kotlin.math.cos
 
 fun main() = application {
+    configure { width = 600; height = 600 }
     program {
-        configure { width = 600; height = 600 }
         extend {
             drawer.clear(ColorRGBa.PINK)
             drawer.strokeWeight = 1.0

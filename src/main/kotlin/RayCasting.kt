@@ -67,9 +67,7 @@ private class LineCollector(private val barriers: List<ShapeContour>) {
     }
 }
 
-private fun collect(lines: List<ShapeContour>) = LineCollector(lines)
-
-private fun Program.randomCollector() = collect(
+private fun Program.randomCollector() = LineCollector(
     buildList {
         repeat(5) {
             LineSegment(
@@ -85,4 +83,3 @@ private fun Program.randomCollector() = collect(
         }
     }
 )
-

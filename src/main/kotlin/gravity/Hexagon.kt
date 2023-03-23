@@ -15,26 +15,22 @@ fun main() = application {
         val point5 = Point(Vector2(50.0, 50.0))
         val point6 = Point(Vector2(100.0, 50.0), mass = mass)
         val point7 = Point(Vector2(0.0, 100.0), mass = mass)
-        val point8 = Point(Vector2(50.0, 100.0), mass = mass)
-        val point9 = Point(Vector2(100.0, 100.0), mass = mass)
-        val point10 = Point(Vector2(0.0, 150.0), mass = mass)
-        val collector = collect(
-            point1,
-            point2,
-            point3,
-            point4,
-            point5,
-            point6,
-            point7,
-//            point8,
-//            point9,
-//            point10,
+        val collector = PointCollector(
+            listOf(
+                point1,
+                point2,
+                point3,
+                point4,
+                point5,
+                point6,
+                point7,
+            )
         )
 
         extend {
             drawer.stroke = ColorRGBa.WHITE
             collector.updateAll()
-           collector.connectAll()
+            collector.connectAll()
 
             point1.follow(mouse.position)
             collector.drawAll(drawer, 5.0)

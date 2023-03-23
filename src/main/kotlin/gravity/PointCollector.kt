@@ -35,5 +35,3 @@ class PointCollector(private val points: List<Point>) {
         drawer.circle(points.last().position, radius)
     }
 }
-
-fun collect(vararg points: Point) = PointCollector(points.toList())
