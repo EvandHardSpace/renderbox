@@ -26,7 +26,7 @@ data class Point(
 
     fun follow(other: Vector2) {
         val distance = position.distanceTo(other)
-        val force = (distance * distance) / forceKoef
+        val force = (distance.pow(2)) / forceKoef
         val angle = atan2(other.y - position.y, other.x - position.x)
         applyForce(Vector2(force * cos(angle), force * sin(angle)))
     }
