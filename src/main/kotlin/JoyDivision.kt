@@ -44,7 +44,7 @@ fun Program.line(startPoint: Vector2, endPointX: Double) = contour {
                     x = startPoint.x + moveSize * i,
                     y = startPoint.y + simplex(
                         position = startPoint.copy(x = (startPoint.x + moveSize * i) / 20),
-                    ).absoluteValue.unaryMinus() * 2000 / (distToCenter.pow(1.4).coerceAtLeast(20.0)) - 10
+                    ).absoluteValue.unaryMinus() * 4000 / (distToCenter.pow(1.25).coerceAtLeast(25.0)) - 10
                 )
             )
         }
