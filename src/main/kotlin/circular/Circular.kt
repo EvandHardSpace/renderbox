@@ -50,7 +50,7 @@ fun ApplicationBuilder.program() = program {
             .filter { it.second in figure }
             .map {
                 Processing(
-                    state = perlin(settings.seed, it.second * 0.03).discreteToStep(),
+                    state = valueHermite(settings.seed, it.second * 0.018).discreteToStep(),
                     position = it.second,
                     gridPosition = it.first,
                 )
@@ -58,18 +58,9 @@ fun ApplicationBuilder.program() = program {
 
         mappedGrid.forEach {
             when (it.state) {
-                Step.XL -> {
-                    //if(mappedGrid.isOk(it, 8))
-                        mappedGrid.markZone(it.gridPosition, 8)
-                }
-                Step.L -> {
-                    //if(mappedGrid.isOk(it, 4))
-                        mappedGrid.markZone(it.gridPosition, 4)
-                }
-                Step.M -> {
-                   //if(mappedGrid.isOk(it, 2))
-                        mappedGrid.markZone(it.gridPosition, 2)
-                }
+                Step.XL -> mappedGrid.markZone(it.gridPosition, 8)
+                Step.L -> mappedGrid.markZone(it.gridPosition, 4)
+                Step.M -> mappedGrid.markZone(it.gridPosition, 2)
                 Step.S -> {}
                 Step.DELETED -> {}
             }

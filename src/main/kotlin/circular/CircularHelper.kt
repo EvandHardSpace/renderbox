@@ -18,15 +18,15 @@ fun Step.getSize(minSize: Double) = when(this) {
 
 fun Step.getColor() = when(this) {
     Step.XL -> ColorRGBa.fromHex("#ffffff")
-    Step.L -> ColorRGBa.fromHex("#b6b6b6")
-    Step.M -> ColorRGBa.fromHex("#545454")
-    Step.S -> ColorRGBa.fromHex("#1c1c1c")
+    Step.L -> ColorRGBa.fromHex("#a1a1a1")
+    Step.M -> ColorRGBa.fromHex("#707070")
+    Step.S -> ColorRGBa.fromHex("#3a3a3a")
     Step.DELETED -> ColorRGBa.RED
 }
 fun Double.discreteToStep(): Step = when (this) {
-    in -1.0..-0.5 -> Step.S
-    in -0.5..0.0 -> Step.M
-    in 0.0..0.5 -> Step.L
-    in 0.5..1.0 -> Step.XL
+    in -1.0..-0.8 -> Step.S
+    in -0.8..-0.2 -> Step.M
+    in -0.2..0.3 -> Step.L
+    in 0.3..1.0 -> Step.XL
     else -> Step.XL
 }
