@@ -1,8 +1,6 @@
 import org.openrndr.Program
 import org.openrndr.application
 import org.openrndr.color.ColorRGBa
-import org.openrndr.draw.isolated
-import org.openrndr.extra.color.presets.LIGHT_CORAL
 import org.openrndr.extra.noise.Random
 import org.openrndr.extra.shapes.operators.roundCorners
 import org.openrndr.math.Vector2
@@ -11,28 +9,23 @@ import kotlin.math.*
 
 private const val ITERATIONS = 300
 fun main() = application {
-    configure { height = 700; width = 700 }
+    configure { height = 500; width = 700 }
     program {
-        val startPoint = Vector2(x = 80.0, y = (height / 4.0))
+        val startPoint = Vector2(x = -4.0, y = (height / 3.3))
+        //extend(ScreenRecorder()) { contentScale = 1.5 }
         extend {
             drawer.apply {
-                stroke = ColorRGBa.LIGHT_CORAL
-                fill = ColorRGBa.BLACK
+                stroke = ColorRGBa.BLACK
+                strokeWeight = 1.1
+                fill = ColorRGBa.WHITE
             }
 
-            (0..70).forEach { i ->
+            (0..59).forEach { i ->
                 val line = line(
-                    startPoint = startPoint.copy(y = startPoint.y + i * 5.0),
-                    endPointX = width - 5.0
+                    startPoint = startPoint.copy(y = startPoint.y + i * 6.0),
+                    endPointX = width + 4.0
                 )
                 drawer.contour(line)
-            }
-
-            drawer.isolated {
-                stroke = ColorRGBa.BLACK
-                rectangle(Vector2.ZERO, width = 82.5, height = 1000.0)
-                rectangle(x = width.toDouble() - 82.5, y = 0.0, width = 82.5, height = 1000.0)
-                rectangle(x = 0.0, y = height - 180.0, width = 1000.0, height = 30.0)
             }
         }
     }
