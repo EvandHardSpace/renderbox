@@ -1,4 +1,4 @@
-package circular
+package square_sky
 
 import org.openrndr.math.IntVector2
 import org.openrndr.math.Vector2
@@ -13,9 +13,6 @@ class Chunk(
     private val lengthUnit: Double,
 ) {
     private val size = 2.0.pow(maxDepth - depth).toInt()
-
-    //if it is root element we should not divide chunks by 2
-    private val halfSize = size / 2
 
     private var node1: Chunk? = null
     private var node2: Chunk? = null
@@ -43,13 +40,13 @@ class Chunk(
 
     private val range: ClosedFloatingPointRange<Double>
         get() = when (depth) {
-            0 -> -1.0..-0.75
-            1 -> -0.75..-0.5
-            2 -> -0.5..0.0
-            3 -> 0.0..0.5
-            4 -> 0.5..1.0
+            0 -> -1.0..-0.5
+            1 -> -0.5..-0.2
+            2 -> -0.2..0.0
+            3 -> 0.0..0.3
+            4 -> 0.3..1.0
             //else -> error("unsupported depth")
-            else -> 0.5..1.0
+            else -> -1.0..-0.4
         }
 
     private fun init() {
@@ -65,7 +62,7 @@ class Chunk(
             lengthUnit = lengthUnit,
         )
 
-        val startIndex2 = startIndex.copy(x = startIndex.x + halfSize)
+        val startIndex2 = startIndex.copy(x = startIndex.x + size / 2)
         node2 = Chunk(
             chunkField = chunkField,
             startIndex = startIndex2,
@@ -74,7 +71,7 @@ class Chunk(
             lengthUnit = lengthUnit,
         )
 
-        val startIndex3 = startIndex.copy(y = startIndex.y + halfSize)
+        val startIndex3 = startIndex.copy(y = startIndex.y + size / 2)
         node3 = Chunk(
             chunkField = chunkField,
             startIndex = startIndex3,
@@ -83,7 +80,7 @@ class Chunk(
             lengthUnit = lengthUnit,
         )
 
-        val startIndex4 = startIndex.copy(x = startIndex.x + halfSize, y = startIndex.y + halfSize)
+        val startIndex4 = startIndex.copy(x = startIndex.x + size / 2, y = startIndex.y + size / 2)
         node4 = Chunk(
             chunkField = chunkField,
             startIndex = startIndex4,
@@ -93,21 +90,20 @@ class Chunk(
         )
     }
 
-    fun draw(onDraw: (position: Vector2, size: Double) -> Unit, isValid: (Vector2) -> Boolean) {
-        if (isValid(chunkField[startIndex.y][startIndex.x].position).not()) return
-        if (depth != 5 && hasChild) onDraw(chunkField[startIndex.y][startIndex.x].position, lengthUnit)
+    fun draw(onDraw: (position: Vector2, size: Double) -> Unit) {
+       // if (depth != 5 && hasChild) onDraw(chunkField[startIndex.y][startIndex.x].position, lengthUnit)
         if (hasChild.not()) {
             onDraw(chunkField[startIndex.y][startIndex.x].position, size * lengthUnit)
             return
         }
-        node1?.draw(onDraw, isValid)
-        node2?.draw(onDraw, isValid)
-        node3?.draw(onDraw, isValid)
-        node4?.draw(onDraw, isValid)
+        node1?.draw(onDraw)
+        node2?.draw(onDraw)
+        node3?.draw(onDraw)
+        node4?.draw(onDraw)
     }
 }
 
-fun chunks(initField: List<List<RawField>>, maxDepth: Int = 5): List<Chunk> = buildList {
+fun chunks(initField: List<List<RawField>>, maxDepth: Int = 4): List<Chunk> = buildList {
     var countOfRootChunks = initField.size
     repeat(maxDepth) { countOfRootChunks /= 2 }
     repeat(countOfRootChunks) { y ->
