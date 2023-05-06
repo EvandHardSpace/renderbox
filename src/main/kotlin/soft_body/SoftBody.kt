@@ -4,12 +4,12 @@ import org.openrndr.MouseButton
 import org.openrndr.application
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
+import org.openrndr.extra.color.presets.LIGHT_CORAL
+import org.openrndr.extra.shapes.operators.roundCorners
 import org.openrndr.math.Vector2
-import org.openrndr.shape.Rectangle
-import org.openrndr.shape.ShapeContour
-import org.openrndr.shape.clamp
-import org.openrndr.shape.contour
+import org.openrndr.shape.*
 import kotlin.math.PI
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -41,7 +41,7 @@ fun main() = application {
         val centerX = width / 2.0
         val centerY = height / 2.0
         val numLayers = 3
-        val numPointsPerLayer = 6
+        val numPointsPerLayer = 7
 
         for (i in 0 until numLayers) {
             val layerRadius = sphereRadius * sin((PI / (numLayers + 1)) * (i + 1))
@@ -139,17 +139,63 @@ fun main() = application {
 //            }
         }
 
+        fun Drawer.renderSoftBody() {
+            val convexHull = grahamScan(pointMasses.map(PointMass::position))
+            val smoothedShape = createRoundedShape(convexHull, 20.0)
+            drawOneColorShape(smoothedShape, ColorRGBa.LIGHT_CORAL)
+        }
+
         extend {
             drawer.run {
-                clear(ColorRGBa.BLACK)
+                clear(ColorRGBa.WHITE)
                 updatePointMasses(0.45)
                 updateSprings()
 
                 selectedPointMass?.position = mouse.position
 
-                drawSprings()
-                drawPointMasses()
+                renderSoftBody()
             }
         }
     }
+}
+
+fun grahamScan(points: List<Vector2>): List<Vector2> {
+    if (points.size <= 3) return points
+
+    val sortedPoints = points.sortedWith(compareBy({ it.y }, { it.x }))
+    val pivot = sortedPoints.first()
+
+    val sortedByAngle = sortedPoints.drop(1).sortedBy {
+        atan2((it.y - pivot.y), (it.x - pivot.x))
+    }
+
+    val hull = mutableListOf(pivot, sortedByAngle[0], sortedByAngle[1])
+
+    for (i in 2 until sortedByAngle.size) {
+        var top = hull.removeLast()
+        while (hull.isNotEmpty() && crossProduct(hull.last(), top, sortedByAngle[i]) <= 0) {
+            top = hull.removeLast()
+        }
+        hull.add(top)
+        hull.add(sortedByAngle[i])
+    }
+
+    return hull
+}
+
+fun crossProduct(o: Vector2, a: Vector2, b: Vector2): Double {
+    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x)
+}
+
+fun Drawer.drawOneColorShape(contour: ShapeContour, color: ColorRGBa) {
+    val compositionDrawer = CompositionDrawer()
+    compositionDrawer.fill = color
+    compositionDrawer.stroke = null
+    compositionDrawer.contour(contour)
+    composition(compositionDrawer.composition)
+}
+
+fun createRoundedShape(points: List<Vector2>, radius: Double): ShapeContour {
+    val contour = ShapeContour.fromPoints(points, closed = true)
+    return contour.roundCorners(radius)
 }
