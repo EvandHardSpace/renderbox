@@ -25,33 +25,30 @@ data class Point(
     }
 
     fun follow(other: Vector2) {
-        val distance = position.distanceTo(other)
-        val force = (distance.pow(2)) / forceKoef
-        val angle = atan2(other.y - position.y, other.x - position.x)
-        applyForce(Vector2(force * cos(angle), force * sin(angle)))
+        position = other
     }
 
-    fun follow(other: Point) {
+    fun follow(other: Point, springLength: Double) {
         if (other == this) return
         val distance = position.distanceTo(other.position)
-        gravity(other, distance, positive = distance >= nodeDistance)
+        gravity(other, distance, equilibrium = distance > springLength)
     }
 
-    fun connectTo(other: Point) {
-        this.follow(other)
-        other.follow(this)
+    fun connectTo(other: Point, dist: Double) {
+        this.follow(other, dist)
+        other.follow(this, dist)
     }
 
-    private fun gravity(other: Point, distance: Double, positive: Boolean = true) {
-        val force = if (distance <= nodeDistance) other.mass * forceKoef / (distance.pow(2))
-        else ((distance - nodeDistance).pow(2)) / (other.mass * forceKoef)
+    private fun gravity(other: Point, distance: Double, equilibrium: Boolean) {
+        val force = if (equilibrium) (other.mass * forceKoef) * (distance.pow(0.9))
+        else (other.mass * forceKoef) / (distance.pow(0.9))
 
         val angle = atan2(other.position.y - position.y, other.position.x - position.x)
         val forceVector = Vector2(force * cos(angle), force * sin(angle))
-        applyForce(if (positive) forceVector else -forceVector)
+        applyForce(if (equilibrium) forceVector else -forceVector)
     }
 
     private fun applyForce(force: Vector2) {
-        acceleration += force / mass
+        acceleration += force / (mass * forceKoef)
     }
 }

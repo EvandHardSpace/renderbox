@@ -6,7 +6,6 @@ package gravity
 //const val mass = 1.0
 
 // === beautiful unstable ===
-const val damping = 0.01
-const val forceKoef = 2000
-const val nodeDistance = 100
+const val damping = 0.09
+const val forceKoef = 1
 const val mass = 1.0
