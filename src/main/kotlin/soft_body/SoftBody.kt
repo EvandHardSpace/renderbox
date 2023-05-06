@@ -1,10 +1,10 @@
 package soft_body
 
-import org.openrndr.MouseButton
-import org.openrndr.application
+import org.openrndr.*
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
-import org.openrndr.extra.color.presets.LIGHT_CORAL
+import org.openrndr.extra.color.presets.BLUE_STEEL
+import org.openrndr.extra.color.presets.LIGHT_SKY_BLUE
 import org.openrndr.extra.shapes.operators.roundCorners
 import org.openrndr.math.Vector2
 import org.openrndr.shape.*
@@ -21,7 +21,7 @@ data class PointMass(
     var gravityAcceleration: Vector2 = Vector2.ZERO
 )
 
-data class Spring(val a: PointMass, val b: PointMass, val restLength: Double, val stiffness: Double = 0.5)
+data class Spring(val a: PointMass, val b: PointMass, val restLength: Double, val stiffness: Double = 0.45)
 
 fun main() = application {
     configure {
@@ -30,18 +30,49 @@ fun main() = application {
     }
 
     program {
+
+
         val pointMasses = mutableListOf<PointMass>()
         val springs = mutableListOf<Spring>()
 
-        val gravity = Vector2(0.0, 40.0)
-        pointMasses.forEach { it.gravityAcceleration = gravity }
+        val defaultGravity = Vector2(0.0, 40.0)
+        val gravityStep = 40.0
+        var gravity = defaultGravity
+
+        var pressedKey: Int? = null
+
+        fun updateGravity() {
+            gravity = when (pressedKey) {
+                KEY_ARROW_LEFT -> Vector2(-gravityStep, 0.0)
+                KEY_ARROW_RIGHT -> Vector2(gravityStep, 0.0)
+                KEY_ARROW_DOWN, null -> defaultGravity
+                else -> gravity
+            }
+
+            pointMasses.forEach { it.gravityAcceleration = gravity }
+        }
+
+
+        keyboard.keyDown.listen { event ->
+            if (event.key in listOf(KEY_ARROW_LEFT, KEY_ARROW_UP, KEY_ARROW_RIGHT, KEY_ARROW_DOWN) && pressedKey == null) {
+                pressedKey = event.key
+                updateGravity()
+            }
+        }
+
+        keyboard.keyUp.listen { event ->
+            if (event.key == pressedKey) {
+                pressedKey = null
+                updateGravity()
+            }
+        }
 
         // Create a sphere of point masses and connect them with springs
         val sphereRadius = 100.0
         val centerX = width / 2.0
         val centerY = height / 2.0
         val numLayers = 3
-        val numPointsPerLayer = 7
+        val numPointsPerLayer = 9
 
         for (i in 0 until numLayers) {
             val layerRadius = sphereRadius * sin((PI / (numLayers + 1)) * (i + 1))
@@ -126,7 +157,7 @@ fun main() = application {
         }
 
         fun Drawer.drawSprings() {
-            stroke = ColorRGBa.WHITE
+            stroke = ColorRGBa.BLUE_STEEL
             for (spring in springs) {
                 lineSegment(spring.a.position, spring.b.position)
             }
@@ -142,7 +173,7 @@ fun main() = application {
         fun Drawer.renderSoftBody() {
             val convexHull = grahamScan(pointMasses.map(PointMass::position))
             val smoothedShape = createRoundedShape(convexHull, 20.0)
-            drawOneColorShape(smoothedShape, ColorRGBa.LIGHT_CORAL)
+            drawOneColorShape(smoothedShape, ColorRGBa.LIGHT_SKY_BLUE)
         }
 
         extend {
